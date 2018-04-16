@@ -47,7 +47,6 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     endpointsServer project(path: ':backend', configuration: 'endpoints')
 
-    implementation project(':jokeLib')
     implementation project(':androidjokelib')
 
     //ui

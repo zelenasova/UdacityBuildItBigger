@@ -1,12 +1,14 @@
 package com.udacity.gradle.builditbigger;
 
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.CardView;
 import android.text.TextUtils;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,7 +17,6 @@ import android.widget.TextView;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.kalata.peter.androidjokelib.JokeActivity;
-import com.kalata.peter.jokelib.JokeManager;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -25,21 +26,16 @@ import butterknife.OnClick;
 /**
  * A placeholder fragment containing a simple view.
  */
-public class MainActivityFragment extends Fragment {
+public class MainActivityFragment extends Fragment implements OnTaskComplete {
 
     @BindView(R.id.adView)
     AdView adView;
-
-    private MainViewModel mainViewModel;
-    private JokeManager jokeManager;
 
     public MainActivityFragment() {}
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        mainViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
-        jokeManager = new JokeManager();
     }
 
     @Override
@@ -56,7 +52,7 @@ public class MainActivityFragment extends Fragment {
     }
 
     private void displayJoke() {
-        JokeActivity.startJokeActivity(getActivity(), jokeManager.getJoke());
+        new JokeGCETask(this).execute();
     }
 
     @OnClick(R.id.btn_tell_joke)
@@ -64,4 +60,8 @@ public class MainActivityFragment extends Fragment {
         displayJoke();
     }
 
+    @Override
+    public void onTaskComplete(String joke) {
+        JokeActivity.startJokeActivity(getActivity(), joke);
+    }
 }
