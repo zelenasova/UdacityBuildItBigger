@@ -31,6 +31,20 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    flavorDimensions "version"
+    productFlavors {
+        paid {
+            dimension "version"
+            applicationId "com.udacity.gradle.builditbigger.paid"
+            buildConfigField 'boolean', 'IS_PAID', 'true'
+        }
+        free {
+            dimension "version"
+            applicationId "com.udacity.gradle.builditbigger.free"
+            buildConfigField 'boolean', 'IS_PAID', 'false'
+        }
+
+    }
     packagingOptions {
         exclude 'META-INF/rxjava.properties'
     }
@@ -65,7 +79,7 @@ dependencies {
     implementation 'com.jakewharton:butterknife:8.8.1'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
 
-    implementation 'com.google.android.gms:play-services-ads:15.0.0'
+    freeImplementation 'com.google.android.gms:play-services-ads:15.0.0'
     implementation 'com.google.api-client:google-api-client:1.23.0'
     implementation 'com.google.http-client:google-http-client-android:1.23.0'
     implementation 'com.google.code.findbugs:jsr305:3.0.1'
