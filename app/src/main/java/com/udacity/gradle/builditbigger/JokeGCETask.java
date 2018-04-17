@@ -11,6 +11,7 @@ import java.lang.ref.WeakReference;
 class JokeGCETask extends AsyncTask<Void, Void, String> {
     private static MyApi myApiService = null;
     WeakReference<OnTaskComplete> weakReference;
+    private boolean success;
 
     public JokeGCETask(OnTaskComplete listener) {
         this.weakReference = new WeakReference<>(listener);
@@ -29,8 +30,10 @@ class JokeGCETask extends AsyncTask<Void, Void, String> {
         }
 
         try {
+            success = true;
             return myApiService.getJoke().execute().getData();
         } catch (IOException e) {
+            success = false;
             return e.getMessage();
         }
     }
@@ -39,7 +42,7 @@ class JokeGCETask extends AsyncTask<Void, Void, String> {
     protected void onPostExecute(String result) {
         OnTaskComplete listener = weakReference.get();
         if (listener != null) {
-            listener.onTaskComplete(result);
+            listener.onTaskComplete(success, result);
         }
     }
 }

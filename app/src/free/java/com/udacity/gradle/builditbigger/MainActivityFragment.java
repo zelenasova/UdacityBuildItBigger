@@ -1,14 +1,19 @@
 package com.udacity.gradle.builditbigger;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
+import android.widget.Toast;
 
+import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.InterstitialAd;
 import com.kalata.peter.androidjokelib.JokeActivity;
 
 import butterknife.BindView;
@@ -21,9 +26,15 @@ import butterknife.OnClick;
  */
 public class MainActivityFragment extends Fragment implements OnTaskComplete {
 
-    @Nullable
+
     @BindView(R.id.adView)
     AdView adView;
+
+    @BindView(R.id.progressbar)
+    ProgressBar progressBar;
+
+    private InterstitialAd mInterstitialAd;
+    private String joke;
 
     public MainActivityFragment() {}
 
@@ -37,9 +48,9 @@ public class MainActivityFragment extends Fragment implements OnTaskComplete {
                              Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_main, container, false);
         ButterKnife.bind(this, root);
-        if (!BuildConfig.IS_PAID) {
-            initAdd();
-        }
+        initAds();
+        System.out.println("onCreateView");
+        initInterstitialAds();
         return root;
     }
 
@@ -47,7 +58,50 @@ public class MainActivityFragment extends Fragment implements OnTaskComplete {
         new JokeGCETask(this).execute();
     }
 
-    private void initAdd() {
+    @Override
+    public void onTaskComplete(boolean success, String result) {
+        progressBar.setVisibility(View.GONE);
+        if (success) {
+            joke = result;
+            if (mInterstitialAd.isLoaded()) {
+                mInterstitialAd.show();
+            } else {
+                startJokeActivity();
+            }
+        } else {
+            Toast.makeText(getActivity(), result, Toast.LENGTH_LONG).show();
+        }
+
+    }
+
+    private void startJokeActivity() {
+        JokeActivity.startJokeActivity(getActivity(), joke);
+    }
+
+    private void initInterstitialAds() {
+        mInterstitialAd = new InterstitialAd(getActivity());
+        mInterstitialAd.setAdUnitId(getString(R.string.interstitial_ads));
+        mInterstitialAd.setAdListener(new AdListener() {
+            @Override
+            public void onAdClosed() {
+                if (getActivity() != null) {
+                    startJokeActivity();
+                    loadAd();
+                }
+
+            }
+        });
+        loadAd();
+
+    }
+
+    private void loadAd() {
+        mInterstitialAd.loadAd(new AdRequest.Builder()
+                .addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
+                .build());
+    }
+
+    private void initAds() {
         AdRequest adRequest = new AdRequest.Builder()
                 .addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
                 .build();
@@ -55,12 +109,9 @@ public class MainActivityFragment extends Fragment implements OnTaskComplete {
     }
 
     @OnClick(R.id.btn_tell_joke)
-    void tellJoke(View view) {
+    void tellJoke() {
+        progressBar.setVisibility(View.VISIBLE);
         displayJoke();
     }
 
-    @Override
-    public void onTaskComplete(String joke) {
-        JokeActivity.startJokeActivity(getActivity(), joke);
-    }
 }
