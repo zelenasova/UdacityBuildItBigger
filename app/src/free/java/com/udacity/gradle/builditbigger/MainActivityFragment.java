@@ -49,7 +49,6 @@ public class MainActivityFragment extends Fragment implements OnTaskComplete {
         View root = inflater.inflate(R.layout.fragment_main, container, false);
         ButterKnife.bind(this, root);
         initAds();
-        System.out.println("onCreateView");
         initInterstitialAds();
         return root;
     }
